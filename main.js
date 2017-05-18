@@ -5,41 +5,34 @@ var request = require('request');
 var async = require('async');
 
 var _html = '';
-var domainUrl = 'http://sucai.redocn.com/tupian/renwutupian/';
+var domainUrl = 'http://sucai.redocn.com/tupian/renwutupian/new-2.html';
 
 var q = async.queue(function(task, callback) {
-    console.log('hello ' + task.name);
-    callback();
-}, 2);
+    console.log(task);
+    nextRequest(task,function(res){
+        if(res == '2'){
+            callback();
+        }else{
+            q.push(task, function(err) {
+                console.log('finished reset processing item');
+            });
+        }
+    })
+}, 1);
 
 // assign a callback
 q.drain = function() {
     console.log('all items have been processed');
 };
 
-// add some items to the queue
-q.push({name: 'foo'}, function(err) {
-    console.log('finished processing foo');
-});
-q.push({name: 'bar'}, function (err) {
-    console.log('finished processing bar');
-});
-
-// add some items to the queue (batch-wise)
-q.push([{name: 'baz'},{name: 'bay'},{name: 'bax'}], function(err) {
-    console.log('finished processing item');
-});
-
-// add some items to the front of the queue
-q.unshift({name: 'bar'}, function (err) {
-    console.log('finished processing bar');
-});
-
-
 function fetchPage(url){
     startRequest(url,function(data){
         console.log('此次抓取数据共'+data.length+'条')
-        nextRequest(data);
+        for(var i=0;i<data.length;i++){
+           q.push(data[i], function(err) {
+                console.log('finished processing item');
+            }); 
+        };
     });
 }
 
@@ -59,8 +52,8 @@ function startRequest(url,fn){
     })
 }
 
-function nextRequest(urllist){
-        http.get(urllist[i],function(res){
+function nextRequest(url,fn){
+        http.get(url,function(res){
             res.setEncoding('utf-8');
             res.on('data',function(chunk){
                 _html += chunk;
@@ -69,7 +62,7 @@ function nextRequest(urllist){
                 var $ = cheerio.load(_html);
                 saveImg($,function(res){
                     if(res == '1'){
-                       
+                        fn('2') 
                     }
                 });
             }).on('error', function (err) {
@@ -101,10 +94,10 @@ function saveImg($,fn){
         var fileWriteStream = fs.createWriteStream('./image/'+ img_filename);
         request(img_src).pipe(fileWriteStream);
         fileWriteStream.on('close',function(){
-            console.log('finish!!!')
+            console.log('image had downloaded')
             fn('1');
         })
     })
 }
 
-//fetchPage(domainUrl);
+fetchPage(domainUrl);
