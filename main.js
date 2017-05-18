@@ -8,14 +8,12 @@ var _html = '';
 var domainUrl = 'http://sucai.redocn.com/tupian/renwutupian/new-2.html';
 
 var q = async.queue(function(task, callback) {
-    console.log(task);
+    console.log('抓取'+task+'中的图片......');
     nextRequest(task,function(res){
         if(res == '2'){
             callback();
         }else{
-            q.push(task, function(err) {
-                console.log('finished reset processing item');
-            });
+            callback()
         }
     })
 }, 1);
