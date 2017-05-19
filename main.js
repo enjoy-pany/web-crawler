@@ -9,7 +9,7 @@ var domainUrl = 'http://sucai.redocn.com/tupian/renwutupian/new-';
 
 //任务队列
 var q = async.queue(function(task, callback) {
-    console.log('抓取' + task + '中的图片');
+    console.log('抓取' + task + '中的数据');
     nextRequest(task, function(res) {
         if (res == '2') {
             callback();
@@ -117,6 +117,11 @@ function nextRequest(url, fn) {
                 fn('2')
             }
         });
+        saveContent($,function(res){
+            if(res== '1'){
+                console.log('text has uploaded')
+            }
+        });
     })
 
 }
@@ -149,6 +154,24 @@ function saveImg($, fn) {
             fn('1');
         })
     })
+}
+
+//抓取内容页 text 部分
+function saveContent($,fn){
+    var Mess = {
+        name: $('.good_right h1').text(),
+        num: $('.canshu_nub').text(),
+        date: $('.add_time_li').text()
+    };
+    console.log(Mess)
+    var text = Mess.name+','+Mess.num+','+Mess.date;
+    fs.appendFile('./data/' + Mess.name + '.txt', text, 'utf-8', function (err) {
+        if (err) {
+            console.log(err);
+        }else{
+            fn('1')
+        }
+    });
 }
 
 initPage(domainUrl,1,3)
