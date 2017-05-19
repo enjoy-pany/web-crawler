@@ -12,6 +12,8 @@
     "async": "^2.4.0",
     "cheerio": "^0.22.0",
     "download": "^6.1.0",
+    "encoding": "^0.1.12",
+    "iconv-lite": "^0.4.17",
     "request": "^2.81.0"
   }
 }
